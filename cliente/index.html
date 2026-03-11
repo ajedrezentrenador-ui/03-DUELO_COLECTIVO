@@ -166,8 +166,7 @@
         }
         
         /* ============================================ */
-        /* TABLERO CON NÚMEROS SOLO EN COLUMNA IZQUIERDA */
-        /* Y LETRAS PEGADAS AL TABLERO */
+        /* TABLERO CON COORDENADAS FIJAS (NUNCA SE MUEVEN) */
         /* ============================================ */
         .tablero-container {
             flex: 2;
@@ -178,32 +177,65 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         
-        .tablero-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        /* Contenedor principal del tablero con grid para alineación perfecta */
+        .tablero-grid {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            grid-template-columns: auto 1fr auto;
+            gap: 0px;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
         }
         
-        /* Letras superiores (a-h) - PEGADAS al tablero */
-        .coordenadas-superiores {
+        /* Esquina superior izquierda (vacía) */
+        .grid-esquina-superior-izquierda {
+            grid-row: 1;
+            grid-column: 1;
+            width: 20px;
+            height: 20px;
+        }
+        
+        /* Letras superiores */
+        .grid-letras-superiores {
+            grid-row: 1;
+            grid-column: 2;
             display: flex;
-            width: 100%;
-            margin-bottom: 0px;
+            justify-content: space-around;
+            align-items: center;
             font-weight: bold;
             color: #7f8c8d;
             font-size: 12px;
-            padding-left: 0px;
+            padding: 0 2px;
         }
         
-        .coordenada-superior {
-            flex: 1;
-            text-align: center;
-            text-transform: lowercase;
+        /* Esquina superior derecha (vacía) */
+        .grid-esquina-superior-derecha {
+            grid-row: 1;
+            grid-column: 3;
+            width: 20px;
+            height: 20px;
+        }
+        
+        /* Números izquierdos */
+        .grid-numeros-izquierdos {
+            grid-row: 2;
+            grid-column: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            font-weight: bold;
+            color: #7f8c8d;
+            font-size: 12px;
+            padding: 2px 0;
+            width: 20px;
         }
         
         /* El tablero */
         #tablero {
-            flex: 1;
+            grid-row: 2;
+            grid-column: 2;
             display: grid;
             grid-template-columns: repeat(8, 1fr);
             border: 2px solid #34495e;
@@ -211,9 +243,43 @@
             overflow: hidden;
             aspect-ratio: 1;
             width: 100%;
-            max-width: 500px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            margin: 0 auto;
+        }
+        
+        /* Números derechos (los dejamos vacíos por ahora) */
+        .grid-numeros-derechos {
+            grid-row: 2;
+            grid-column: 3;
+            width: 20px;
+        }
+        
+        /* Esquina inferior izquierda (vacía) */
+        .grid-esquina-inferior-izquierda {
+            grid-row: 3;
+            grid-column: 1;
+            width: 20px;
+            height: 20px;
+        }
+        
+        /* Letras inferiores */
+        .grid-letras-inferiores {
+            grid-row: 3;
+            grid-column: 2;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            font-weight: bold;
+            color: #7f8c8d;
+            font-size: 12px;
+            padding: 0 2px;
+        }
+        
+        /* Esquina inferior derecha (vacía) */
+        .grid-esquina-inferior-derecha {
+            grid-row: 3;
+            grid-column: 3;
+            width: 20px;
+            height: 20px;
         }
         
         .casilla {
@@ -241,7 +307,7 @@
         .casilla.blanca { background: #f5f5f5; }
         .casilla.negra { background: #7f8c8d; }
         
-        /* Números SOLO en la primera columna (columna 0) */
+        /* Números SOLO en la primera columna (columna 0) - AHORA USANDO EL GRID */
         .casilla[data-columna="0"]::after {
             content: attr(data-fila-num);
             position: absolute;
@@ -258,23 +324,6 @@
             color: rgba(255, 255, 255, 0.5);
         }
         
-        /* Letras inferiores (a-h) - PEGADAS al tablero */
-        .coordenadas-inferiores {
-            display: flex;
-            width: 100%;
-            margin-top: 0px;
-            font-weight: bold;
-            color: #7f8c8d;
-            font-size: 12px;
-            padding-left: 0px;
-        }
-        
-        .coordenada-inferior {
-            flex: 1;
-            text-align: center;
-            text-transform: lowercase;
-        }
-        
         .turno-indicador {
             background: #f39c12;
             color: white;
@@ -283,7 +332,7 @@
             font-weight: bold;
             font-size: 0.9rem;
             text-align: center;
-            margin-top: 10px;
+            margin-top: 15px;
             display: inline-block;
             width: auto;
         }
@@ -433,7 +482,7 @@
         .botones-panel {
             display: flex;
             gap: 8px;
-            margin-top: 10px;
+            margin-top: 15px;
             flex-wrap: wrap;
         }
         
@@ -458,8 +507,12 @@
             .container { padding: 12px; }
             h1 { font-size: 1.4rem; }
             
-            .coordenadas-superiores,
-            .coordenadas-inferiores {
+            .grid-letras-superiores,
+            .grid-letras-inferiores {
+                font-size: 11px;
+            }
+            
+            .grid-numeros-izquierdos {
                 font-size: 11px;
             }
             
@@ -473,8 +526,12 @@
         }
         
         @media (max-width: 480px) {
-            .coordenadas-superiores,
-            .coordenadas-inferiores {
+            .grid-letras-superiores,
+            .grid-letras-inferiores {
+                font-size: 10px;
+            }
+            
+            .grid-numeros-izquierdos {
                 font-size: 10px;
             }
             
@@ -523,36 +580,43 @@
                 
                 <div class="main-content">
                     <div class="tablero-container">
-                        <div class="tablero-wrapper">
-                            <!-- Letras superiores (a-h) - PEGADAS -->
-                            <div class="coordenadas-superiores" id="coordsSuperiores">
-                                <div class="coordenada-superior">a</div>
-                                <div class="coordenada-superior">b</div>
-                                <div class="coordenada-superior">c</div>
-                                <div class="coordenada-superior">d</div>
-                                <div class="coordenada-superior">e</div>
-                                <div class="coordenada-superior">f</div>
-                                <div class="coordenada-superior">g</div>
-                                <div class="coordenada-superior">h</div>
+                        <!-- NUEVO: Grid con coordenadas fijas -->
+                        <div class="tablero-grid">
+                            <!-- Esquina superior izquierda (vacía) -->
+                            <div class="grid-esquina-superior-izquierda"></div>
+                            
+                            <!-- Letras superiores -->
+                            <div class="grid-letras-superiores">
+                                <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+                            </div>
+                            
+                            <!-- Esquina superior derecha (vacía) -->
+                            <div class="grid-esquina-superior-derecha"></div>
+                            
+                            <!-- Números izquierdos (1-8) -->
+                            <div class="grid-numeros-izquierdos">
+                                <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
                             </div>
                             
                             <!-- Tablero -->
                             <div id="tablero"></div>
                             
-                            <!-- Letras inferiores (a-h) - PEGADAS -->
-                            <div class="coordenadas-inferiores" id="coordsInferiores">
-                                <div class="coordenada-inferior">a</div>
-                                <div class="coordenada-inferior">b</div>
-                                <div class="coordenada-inferior">c</div>
-                                <div class="coordenada-inferior">d</div>
-                                <div class="coordenada-inferior">e</div>
-                                <div class="coordenada-inferior">f</div>
-                                <div class="coordenada-inferior">g</div>
-                                <div class="coordenada-inferior">h</div>
+                            <!-- Números derechos (vacío, solo para mantener el grid) -->
+                            <div class="grid-numeros-derechos"></div>
+                            
+                            <!-- Esquina inferior izquierda (vacía) -->
+                            <div class="grid-esquina-inferior-izquierda"></div>
+                            
+                            <!-- Letras inferiores -->
+                            <div class="grid-letras-inferiores">
+                                <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
                             </div>
                             
-                            <div id="turnoDisplay" class="turno-indicador">⚪ Blancas</div>
+                            <!-- Esquina inferior derecha (vacía) -->
+                            <div class="grid-esquina-inferior-derecha"></div>
                         </div>
+                        
+                        <div class="turno-indicador" id="turnoDisplay">⚪ Blancas</div>
                         
                         <div class="botones-panel">
                             <button id="btnBuscarDuelo" class="btn-duelo">Buscar Duelo</button>
