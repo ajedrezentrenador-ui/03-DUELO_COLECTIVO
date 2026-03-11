@@ -1,4 +1,7 @@
 const WebSocket = require('ws');
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
 
 // ============================================
 // CONFIGURACIÓN DEL ENTRENADOR (SOLO ADMINISTRADOR)
@@ -154,7 +157,60 @@ function prepararProblemas() {
     return disponibles;
 }
 
-const servidor = new WebSocket.Server({ port: 8080 });
+// ============================================
+// SERVIDOR HTTP PARA ARCHIVOS ESTÁTICOS
+// ============================================
+const server = http.createServer((req, res) => {
+    console.log(`📁 Solicitud HTTP: ${req.url}`);
+    
+    // Construir la ruta del archivo desde la carpeta cliente
+    let filePath;
+    if (req.url === '/') {
+        filePath = path.join(__dirname, '../cliente/index.html');
+    } else {
+        filePath = path.join(__dirname, '../cliente', req.url);
+    }
+    
+    // Determinar el tipo de contenido
+    const ext = path.extname(filePath);
+    let contentType = 'text/html';
+    const mimeTypes = {
+        '.html': 'text/html',
+        '.js': 'text/javascript',
+        '.css': 'text/css',
+        '.json': 'application/json',
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.svg': 'image/svg+xml',
+        '.ico': 'image/x-icon',
+        '.txt': 'text/plain'
+    };
+    if (mimeTypes[ext]) contentType = mimeTypes[ext];
+    
+    // Leer y enviar el archivo
+    fs.readFile(filePath, (err, content) => {
+        if (err) {
+            if (err.code === 'ENOENT') {
+                console.log(`❌ Archivo no encontrado: ${filePath}`);
+                res.writeHead(404);
+                res.end('Archivo no encontrado');
+            } else {
+                console.log(`❌ Error al leer archivo: ${err.code}`);
+                res.writeHead(500);
+                res.end(`Error del servidor: ${err.code}`);
+            }
+        } else {
+            res.writeHead(200, { 'Content-Type': contentType });
+            res.end(content);
+        }
+    });
+});
+
+// ============================================
+// SERVIDOR WEBSOCKET (MISMO PUERTO)
+// ============================================
+const wss = new WebSocket.Server({ server });
 let jugadores = {};
 let duelos = [];
 let idDueloCounter = 1;
@@ -163,7 +219,7 @@ let salaEspera = [];
 console.log("====================================");
 console.log("🖥️  SERVIDOR DE DUELO DE PROBLEMAS");
 console.log("============ MODO DUELO ============");
-console.log(`📡 Escuchando en: ws://localhost:8080`);
+console.log(`📡 Servidor preparado para iniciar`);
 console.log(`📚 Problemas disponibles: ${problemas.length}`);
 console.log(`🎯 Problemas por sesión: ${CONFIG.problemasPorSesion > 0 ? CONFIG.problemasPorSesion : 'TODOS'}`);
 console.log(`🔄 Modo problemas: ${CONFIG.modoProblemas}`);
@@ -173,7 +229,10 @@ console.log(`⏱️ Tiempo total sesión: ${CONFIG.tiempoTotalSesion > 0 ? CONFI
 console.log(`🎯 Fallos máximos: ${CONFIG.fallosMaximos}`);
 console.log("====================================");
 
-servidor.on('connection', (ws) => {
+// ============================================
+// WEBSOCKET CONNECTION HANDLER
+// ============================================
+wss.on('connection', (ws) => {
     if (Object.keys(jugadores).length >= 50) { // Límite absoluto de conexiones
         ws.send(JSON.stringify({ tipo: 'error', mensaje: 'Servidor lleno' }));
         ws.close();
@@ -834,3 +893,13 @@ function manejarDesconexion(idJugador) {
         salaEspera.splice(indexEspera, 1);
     }
 }
+
+// ============================================
+// INICIAR SERVIDOR
+// ============================================
+const PORT = process.env.PORT || 8080;
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`✅ Servidor HTTP y WebSocket corriendo en puerto ${PORT}`);
+    console.log(`🌍 Accede a: https://zero3-duelo-colectivo.onrender.com (o localhost:${PORT} en local)`);
+    console.log(`📁 Sirviendo archivos desde: ${path.join(__dirname, '../cliente')}`);
+});
