@@ -366,7 +366,12 @@ function agregarMensaje(texto, tipo) {
 }
 
 btnConectar.onclick = () => {
-    socket = new WebSocket('ws://localhost:8080');
+    // Detectar entorno: local vs producción
+    const wsUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'ws://localhost:8080'
+        : `wss://${window.location.hostname}`;
+    
+    socket = new WebSocket(wsUrl);
     
     socket.onopen = () => {
         estadoSpan.textContent = 'Conectado';
