@@ -167,6 +167,7 @@
         
         /* ============================================ */
         /* TABLERO CON NÚMEROS SOLO EN COLUMNA IZQUIERDA */
+        /* Y LETRAS PEGADAS AL TABLERO */
         /* ============================================ */
         .tablero-container {
             flex: 2;
@@ -183,15 +184,15 @@
             align-items: center;
         }
         
-        /* Letras superiores (a-h) - FUERA pero pegadas */
+        /* Letras superiores (a-h) - PEGADAS al tablero */
         .coordenadas-superiores {
             display: flex;
             width: 100%;
-            margin-bottom: 2px;
+            margin-bottom: 0px;
             font-weight: bold;
             color: #7f8c8d;
             font-size: 12px;
-            padding-left: 20px; /* Espacio para compensar números de la izquierda */
+            padding-left: 0px;
         }
         
         .coordenada-superior {
@@ -200,12 +201,7 @@
             text-transform: lowercase;
         }
         
-        .tablero-con-coordenadas {
-            display: flex;
-            width: 100%;
-        }
-        
-        /* El tablero ocupa el máximo espacio */
+        /* El tablero */
         #tablero {
             flex: 1;
             display: grid;
@@ -262,15 +258,15 @@
             color: rgba(255, 255, 255, 0.5);
         }
         
-        /* Letras inferiores (a-h) - FUERA pero pegadas */
+        /* Letras inferiores (a-h) - PEGADAS al tablero */
         .coordenadas-inferiores {
             display: flex;
             width: 100%;
-            margin-top: 2px;
+            margin-top: 0px;
             font-weight: bold;
             color: #7f8c8d;
             font-size: 12px;
-            padding-left: 20px;
+            padding-left: 0px;
         }
         
         .coordenada-inferior {
@@ -456,7 +452,7 @@
         }
         
         /* ============================================ */
-        /* RESPONSIVE AVANZADO */
+        /* RESPONSIVE */
         /* ============================================ */
         @media (max-width: 768px) {
             .container { padding: 12px; }
@@ -465,7 +461,6 @@
             .coordenadas-superiores,
             .coordenadas-inferiores {
                 font-size: 11px;
-                padding-left: 18px;
             }
             
             .casilla[data-columna="0"]::after {
@@ -481,7 +476,6 @@
             .coordenadas-superiores,
             .coordenadas-inferiores {
                 font-size: 10px;
-                padding-left: 16px;
             }
             
             .casilla[data-columna="0"]::after {
@@ -530,7 +524,7 @@
                 <div class="main-content">
                     <div class="tablero-container">
                         <div class="tablero-wrapper">
-                            <!-- Letras superiores (a-h) -->
+                            <!-- Letras superiores (a-h) - PEGADAS -->
                             <div class="coordenadas-superiores" id="coordsSuperiores">
                                 <div class="coordenada-superior">a</div>
                                 <div class="coordenada-superior">b</div>
@@ -542,10 +536,10 @@
                                 <div class="coordenada-superior">h</div>
                             </div>
                             
-                            <!-- Tablero (los números van DENTRO de las casillas de la primera columna) -->
+                            <!-- Tablero -->
                             <div id="tablero"></div>
                             
-                            <!-- Letras inferiores (a-h) -->
+                            <!-- Letras inferiores (a-h) - PEGADAS -->
                             <div class="coordenadas-inferiores" id="coordsInferiores">
                                 <div class="coordenada-inferior">a</div>
                                 <div class="coordenada-inferior">b</div>
