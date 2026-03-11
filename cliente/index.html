@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>⚔️ DUELO DE PROBLEMAS MULTIJUGADOR</title>
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            background: #1a2a3a;
+            padding: 8px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #ecf0f1;
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
+        }
+        
+        .modo-badge {
+            text-align: center;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            color: #e67e22;
+            background: #fff;
+            padding: 4px 12px;
+            border-radius: 30px;
+            display: inline-block;
+            width: auto;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid #e67e22;
+        }
+        
+        .conexion {
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 40px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .conectado { color: #27ae60; font-weight: bold; }
+        .desconectado { color: #e74c3c; font-weight: bold; }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 30px;
+            background: #3498db;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            min-width: 90px;
+            font-size: 14px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        button:hover { background: #2980b9; }
+        button:active { transform: scale(0.98); }
+        button:disabled { background: #bdc3c7; cursor: not-allowed; }
+        
+        .registro {
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+            display: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .registro input {
+            padding: 12px 20px;
+            width: 100%;
+            max-width: 280px;
+            margin: 8px 0;
+            border: 2px solid #3498db;
+            border-radius: 30px;
+            font-size: 15px;
+            outline: none;
+        }
+        
+        .juego-panel {
+            display: none;
+        }
+        
+        .duelo-panel {
+            display: none;
+        }
+        
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            background: #fff;
+            padding: 12px 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-weight: 500;
+            font-size: 13px;
+        }
+        
+        .badge {
+            background: #3498db;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-weight: bold;
+            display: inline-block;
+            font-size: 12px;
+        }
+        
+        .tiempos-box {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .tiempo-item {
+            background: #fff;
+            padding: 4px 12px;
+            border-radius: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-size: 12px;
+            font-weight: bold;
+            border: 1px solid #e67e22;
+        }
+        
+        .tiempo-valor {
+            color: #e67e22;
+            font-size: 1em;
+            margin-left: 3px;
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        /* ============================================ */
+        /* TABLERO CON COORDENADAS COMPACTAS */
+        /* ============================================ */
+        .tablero-container {
+            flex: 2;
+            min-width: 300px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .tablero-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        /* Letras superiores (a-h) - FUERA pero pegadas */
+        .coordenadas-superiores {
+            display: flex;
+            width: 100%;
+            margin-bottom: 2px;
+            font-weight: bold;
+            color: #7f8c8d;
+            font-size: 12px;
+            padding-left: 20px; /* Espacio para compensar números internos */
+        }
+        
+        .coordenada-superior {
+            flex: 1;
+            text-align: center;
+            text-transform: lowercase;
+        }
+        
+        .tablero-con-coordenadas {
+            display: flex;
+            width: 100%;
+        }
+        
+        /* El tablero ocupa el máximo espacio */
+        #tablero {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            border: 2px solid #34495e;
+            border-radius: 6px;
+            overflow: hidden;
+            aspect-ratio: 1;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            margin: 0 auto;
+        }
+        
+        .casilla {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .casilla img {
+            width: 85%;
+            height: 85%;
+            object-fit: contain;
+            transition: transform 0.1s;
+            pointer-events: auto;
+            z-index: 2;
+        }
+        
+        .casilla:active img {
+            transform: scale(1.1);
+        }
+        
+        .casilla.blanca { background: #f5f5f5; }
+        .casilla.negra { background: #7f8c8d; }
+        
+        /* Números DENTRO de las casillas (esquina superior izquierda) */
+        .casilla::after {
+            content: attr(data-fila-num);
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            font-size: 9px;
+            font-weight: bold;
+            color: rgba(0, 0, 0, 0.4);
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .casilla.negra::after {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Letras inferiores (a-h) - FUERA pero pegadas */
+        .coordenadas-inferiores {
+            display: flex;
+            width: 100%;
+            margin-top: 2px;
+            font-weight: bold;
+            color: #7f8c8d;
+            font-size: 12px;
+            padding-left: 20px;
+        }
+        
+        .coordenada-inferior {
+            flex: 1;
+            text-align: center;
+            text-transform: lowercase;
+        }
+        
+        .turno-indicador {
+            background: #f39c12;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-top: 10px;
+            display: inline-block;
+            width: auto;
+        }
+        
+        /* Panel derecho */
+        .panel-derecho {
+            flex: 1;
+            min-width: 260px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .info-problema {
+            background: #fff;
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .info-problema h4 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #7f8c8d;
+        }
+        
+        .info-problema p {
+            color: #2c3e50;
+            font-size: 0.9rem;
+            line-height: 1.3;
+        }
+        
+        /* Marcadores compactos */
+        .marcadores-container {
+            background: #fff;
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .marcador-propio {
+            background: #d4edda;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 3px solid #27ae60;
+            font-size: 0.9rem;
+        }
+        
+        .marcador-jugadores {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .marcador-jugador {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 8px;
+            border-bottom: 1px solid #ecf0f1;
+            font-size: 0.85rem;
+        }
+        
+        .jugador-nombre {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .jugador-puntos {
+            color: #3498db;
+            font-weight: bold;
+        }
+        
+        .estadistica {
+            display: flex;
+            justify-content: space-between;
+            margin: 3px 0;
+        }
+        
+        /* Paneles de estado */
+        .espera, .preparacion, .duelo-activo {
+            background: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            display: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .chat {
+            background: #fff;
+            padding: 12px;
+            border-radius: 12px;
+            height: 160px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .chat h4 {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            color: #7f8c8d;
+        }
+        
+        #mensajes {
+            flex: 1;
+            overflow-y: auto;
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        
+        .mensaje {
+            padding: 4px 8px;
+            margin: 3px 0;
+            background: #e9ecef;
+            border-radius: 12px;
+            word-wrap: break-word;
+        }
+        
+        .mensaje.sistema {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .botones-panel {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-duelo {
+            background: #e67e22;
+            flex: 1;
+            font-size: 13px;
+            padding: 8px 15px;
+        }
+        
+        .btn-abandonar {
+            background: #e74c3c;
+            display: none;
+            font-size: 13px;
+            padding: 8px 15px;
+        }
+        
+        /* ============================================ */
+        /* RESPONSIVE AVANZADO */
+        /* ============================================ */
+        @media (max-width: 768px) {
+            .container { padding: 12px; }
+            h1 { font-size: 1.4rem; }
+            
+            .coordenadas-superiores,
+            .coordenadas-inferiores {
+                font-size: 11px;
+                padding-left: 18px;
+            }
+            
+            .casilla::after {
+                font-size: 8px;
+                top: 1px;
+                left: 1px;
+            }
+            
+            .casilla img { width: 80%; height: 80%; }
+        }
+        
+        @media (max-width: 480px) {
+            .coordenadas-superiores,
+            .coordenadas-inferiores {
+                font-size: 10px;
+                padding-left: 16px;
+            }
+            
+            .casilla::after {
+                font-size: 7px;
+            }
+            
+            .header-info { flex-direction: column; align-items: center; }
+            .tiempos-box { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>♜ DUELO DE PROBLEMAS ♞</h1>
+        <div style="text-align: center;">
+            <div class="modo-badge">⚔️ MODO DUELO MULTIJUGADOR</div>
+        </div>
+        
+        <div class="conexion">
+            <span>Estado: <span id="estado" class="desconectado">Desconectado</span></span>
+            <button id="btnConectar">Conectar</button>
+            <button id="btnDesconectar" disabled>Desconectar</button>
+        </div>
+        
+        <div id="registro" class="registro">
+            <h3>Registro</h3>
+            <input type="text" id="nombreInput" placeholder="Tu nombre" value="Jugador">
+            <button id="btnRegistrar">Registrarse</button>
+        </div>
+        
+        <div id="juegoPanel" class="juego-panel">
+            <div class="duelo-panel" id="dueloPanel">
+                <div class="header-info">
+                    <div><strong>ID:</strong> <span id="miId">-</span></div>
+                    <div><strong>Nombre:</strong> <span id="miNombre">-</span></div>
+                    <div class="tiempos-box">
+                        <div class="tiempo-item">
+                            ⏱️ <span id="tiempoProblema" class="tiempo-valor">∞</span>
+                        </div>
+                        <div class="tiempo-item">
+                            ⏳ <span id="tiempoTotal" class="tiempo-valor">∞</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="main-content">
+                    <div class="tablero-container">
+                        <div class="tablero-wrapper">
+                            <!-- Letras superiores (a-h) -->
+                            <div class="coordenadas-superiores" id="coordsSuperiores">
+                                <div class="coordenada-superior">a</div>
+                                <div class="coordenada-superior">b</div>
+                                <div class="coordenada-superior">c</div>
+                                <div class="coordenada-superior">d</div>
+                                <div class="coordenada-superior">e</div>
+                                <div class="coordenada-superior">f</div>
+                                <div class="coordenada-superior">g</div>
+                                <div class="coordenada-superior">h</div>
+                            </div>
+                            
+                            <!-- Tablero (los números van DENTRO de las casillas) -->
+                            <div id="tablero"></div>
+                            
+                            <!-- Letras inferiores (a-h) -->
+                            <div class="coordenadas-inferiores" id="coordsInferiores">
+                                <div class="coordenada-inferior">a</div>
+                                <div class="coordenada-inferior">b</div>
+                                <div class="coordenada-inferior">c</div>
+                                <div class="coordenada-inferior">d</div>
+                                <div class="coordenada-inferior">e</div>
+                                <div class="coordenada-inferior">f</div>
+                                <div class="coordenada-inferior">g</div>
+                                <div class="coordenada-inferior">h</div>
+                            </div>
+                            
+                            <div id="turnoDisplay" class="turno-indicador">⚪ Blancas</div>
+                        </div>
+                        
+                        <div class="botones-panel">
+                            <button id="btnBuscarDuelo" class="btn-duelo">Buscar Duelo</button>
+                            <button id="btnCancelarBusqueda" class="btn-abandonar" style="display:none;">Cancelar</button>
+                        </div>
+                    </div>
+                    
+                    <div class="panel-derecho">
+                        <div id="espera" class="espera" style="display:none;">
+                            <h4>Buscando jugadores</h4>
+                            <div class="spinner"></div>
+                            <p>En sala: <strong id="contadorEspera">0/0</strong></p>
+                        </div>
+                        
+                        <div id="preparacion" class="preparacion" style="display:none;">
+                            <h4>⚔️ Duelo encontrado</h4>
+                            <p>Rivales: <strong id="nombreRivales">-</strong></p>
+                            <p>Inicio en: <strong id="tiempoPreparacion">5</strong>s</p>
+                            <button id="btnListo" class="btn-duelo" style="margin-top:8px;">Listo</button>
+                        </div>
+                        
+                        <div id="dueloActivo" class="duelo-activo" style="display:none;">
+                            <div class="info-problema">
+                                <h4>Problema</h4>
+                                <p id="problemaDesc">Esperando...</p>
+                            </div>
+                            
+                            <div class="marcadores-container">
+                                <div class="marcador-propio">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                        <strong id="miNombreDisplay">Tú</strong>
+                                        <span class="badge"><span id="puntuacionPropia">0</span> pts</span>
+                                    </div>
+                                    <div class="estadistica">
+                                        <span>✓ Aciertos:</span>
+                                        <span id="aciertosPropios">0</span>
+                                    </div>
+                                    <div class="estadistica">
+                                        <span>✗ Fallos:</span>
+                                        <span id="fallosPropios">0</span>
+                                    </div>
+                                </div>
+                                
+                                <div id="contenedorMarcadores" class="marcador-jugadores">
+                                    <!-- Marcadores de otros jugadores -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="chat">
+                            <h4>Eventos</h4>
+                            <div id="mensajes"></div>
+                            <button id="btnAbandonar" class="btn-abandonar">Abandonar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
